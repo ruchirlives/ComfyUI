@@ -338,6 +338,7 @@ def build_asset_specs(
                 "metadata": metadata,
                 "hash": asset_hash,
                 "mime_type": mime_type,
+                "job_id": None,
             }
         )
         tag_pool.update(tags)

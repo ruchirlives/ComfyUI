@@ -9,6 +9,8 @@ import folder_paths
 import time
 from comfy.cli_args import args, enables_dynamic_vram
 from app.logger import setup_logger
+from app.assets.seeder import asset_seeder
+from app.assets.services import register_output_files
 import itertools
 import utils.extra_config
 from utils.mime_types import init_mime_types
@@ -192,7 +194,6 @@ if 'torch' in sys.modules:
 
 
 import comfy.utils
-from app.assets.seeder import asset_seeder
 
 import execution
 import server
@@ -240,6 +241,24 @@ def cuda_malloc_warning():
             logging.warning("\nWARNING: this card most likely does not support cuda-malloc, if you get \"CUDA error\" please run ComfyUI with: --disable-cuda-malloc\n")
 
 
+def _collect_output_absolute_paths(history_result: dict) -> list[str]:
+    """Extract absolute file paths for output items from a history result."""
+    paths = []
+    base_dir = folder_paths.get_directory_by_type("output")
+    for node_output in history_result.get("outputs", {}).values():
+        for items in node_output.values():
+            if not isinstance(items, list):
+                continue
+            for item in items:
+                if not isinstance(item, dict) or item.get("type") != "output":
+                    continue
+                filename = item.get("filename")
+                if not filename:
+                    continue
+                paths.append(os.path.join(base_dir, item.get("subfolder", ""), filename))
+    return paths
+
+
 def prompt_worker(q, server_instance):
     current_time: float = 0.0
     cache_type = execution.CacheType.CLASSIC
@@ -274,6 +293,7 @@ def prompt_worker(q, server_instance):
 
             asset_seeder.pause()
             e.execute(item[2], prompt_id, extra_data, item[4])
+
             need_gc = True
 
             remove_sensitive = lambda prompt: prompt[:5] + prompt[6:]
@@ -317,6 +337,11 @@ def prompt_worker(q, server_instance):
                 last_gc_collect = current_time
                 need_gc = False
                 hook_breaker_ac10a0.restore_functions()
+
+                if not asset_seeder.is_disabled():
+                    paths = _collect_output_absolute_paths(e.history_result)
+                    if register_output_files(paths, job_id=prompt_id) > 0:
+                        asset_seeder.enqueue_enrich(roots=("output",), compute_hashes=True)
                 asset_seeder.resume()
 
 
