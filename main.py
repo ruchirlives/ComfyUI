@@ -245,6 +245,8 @@ def _collect_output_absolute_paths(history_result: dict) -> list[str]:
     """Extract absolute file paths for output items from a history result."""
     paths = []
     base_dir = folder_paths.get_directory_by_type("output")
+    if base_dir is None:
+        return paths
     for node_output in history_result.get("outputs", {}).values():
         for items in node_output.values():
             if not isinstance(items, list):
