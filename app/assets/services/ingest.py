@@ -177,7 +177,7 @@ def ingest_existing_file(
         "info_name": name,
         "tags": tags,
         "fname": os.path.basename(abs_path),
-        "metadata": None,
+        "metadata": user_metadata,
         "hash": None,
         "mime_type": mime_type,
         "job_id": job_id,
