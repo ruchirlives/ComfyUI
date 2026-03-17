@@ -77,7 +77,7 @@ class _AssetSeeder:
     """
 
     def __init__(self) -> None:
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._state = State.IDLE
         self._progress: Progress | None = None
         self._last_progress: Progress | None = None
@@ -637,12 +637,12 @@ class _AssetSeeder:
             with self._lock:
                 self._reset_to_idle()
                 pending = self._pending_enrich
-                self._pending_enrich = None
-            if pending is not None:
-                self.start_enrich(
-                    roots=pending["roots"],
-                    compute_hashes=pending["compute_hashes"],
-                )
+                if pending is not None:
+                    self._pending_enrich = None
+                    self.start_enrich(
+                        roots=pending["roots"],
+                        compute_hashes=pending["compute_hashes"],
+                    )
 
     def _run_fast_phase(self, roots: tuple[RootType, ...]) -> tuple[int, int, int]:
         """Run phase 1: fast scan to create stub records.
