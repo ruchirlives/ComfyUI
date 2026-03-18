@@ -118,6 +118,13 @@ class TopologicalSort:
         class_def = nodes.NODE_CLASS_MAPPINGS[class_type]
         return get_input_info(class_def, input_name)
 
+    def is_intermediate_output(self, node_id):
+        class_type = self.dynprompt.get_node(node_id)["class_type"]
+        class_def = nodes.NODE_CLASS_MAPPINGS.get(class_type)
+        if class_def is None:
+            return False
+        return hasattr(class_def, 'HAS_INTERMEDIATE_OUTPUT') and class_def.HAS_INTERMEDIATE_OUTPUT == True
+
     def make_input_strong_link(self, to_node_id, to_input):
         inputs = self.dynprompt.get_node(to_node_id)["inputs"]
         if to_input not in inputs:
@@ -129,7 +136,7 @@ class TopologicalSort:
         self.add_strong_link(from_node_id, from_socket, to_node_id)
 
     def add_strong_link(self, from_node_id, from_socket, to_node_id):
-        if not self.is_cached(from_node_id):
+        if not self.is_cached(from_node_id) or self.is_intermediate_output(from_node_id):
             self.add_node(from_node_id)
             if to_node_id not in self.blocking[from_node_id]:
                 self.blocking[from_node_id][to_node_id] = {}
@@ -159,7 +166,7 @@ class TopologicalSort:
                     _, _, input_info = self.get_input_info(unique_id, input_name)
                     is_lazy = input_info is not None and "lazy" in input_info and input_info["lazy"]
                     if (include_lazy or not is_lazy):
-                        if not self.is_cached(from_node_id):
+                        if not self.is_cached(from_node_id) or self.is_intermediate_output(from_node_id):
                             node_ids.append(from_node_id)
                         links.append((from_node_id, from_socket, unique_id))
 
@@ -276,6 +283,8 @@ class ExecutionList(TopologicalSort):
             class_type = self.dynprompt.get_node(node_id)["class_type"]
             class_def = nodes.NODE_CLASS_MAPPINGS[class_type]
             if hasattr(class_def, 'OUTPUT_NODE') and class_def.OUTPUT_NODE == True:
+                return True
+            if hasattr(class_def, 'HAS_INTERMEDIATE_OUTPUT') and class_def.HAS_INTERMEDIATE_OUTPUT == True:
                 return True
             return False
 
