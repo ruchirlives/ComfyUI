@@ -762,6 +762,7 @@ class GLSLShader(io.ComfyNode):
                 "Apply GLSL ES fragment shaders to images. "
                 "u_resolution (vec2) is always available."
             ),
+            has_intermediate_output=True,
             inputs=[
                 io.String.Input(
                     "fragment_shader",
