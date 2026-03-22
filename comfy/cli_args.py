@@ -263,6 +263,6 @@ else:
     args.fast = set(args.fast)
 
 def enables_dynamic_vram():
-    if args.enable_dynamic_vram:
+    if getattr(args, "enable_dynamic_vram", False):
         return True
     return not args.disable_dynamic_vram and not args.highvram and not args.gpu_only and not args.novram and not args.cpu
