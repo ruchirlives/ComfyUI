@@ -3,11 +3,13 @@ setlocal
 
 cd /d "%~dp0"
 
-REM Activate venv
-call venv\Scripts\activate.bat
+if not exist "venv\Scripts\python.exe" (
+  echo Virtual environment not found at "venv\Scripts\python.exe"
+  exit /b 1
+)
 
-REM Run ComfyUI using venv python
-python main.py ^
+REM Run ComfyUI with the venv interpreter only
+"%~dp0venv\Scripts\python.exe" "%~dp0main.py" ^
   --input-directory "I:\AI\input" ^
   --output-directory "I:\AI\output" ^
   --user-directory "I:\AI\workflows" ^
