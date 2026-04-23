@@ -14,6 +14,7 @@ REM Run ComfyUI with the venv interpreter only
   --output-directory "I:\AI\output" ^
   --user-directory "I:\AI\workflows" ^
   --extra-model-paths-config "I:\AI\ComfyUI-Configs\extra_model_paths.yaml" ^
-  --enable-manager
+  --enable-manager ^
+  --cache-none
 
 endlocal
