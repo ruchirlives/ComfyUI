@@ -10,6 +10,7 @@ if not exist "venv\Scripts\python.exe" (
 
 REM Run ComfyUI with the venv interpreter only
 "%~dp0venv\Scripts\python.exe" "%~dp0main.py" ^
+  --base-directory "I:\AI" ^
   --input-directory "I:\AI\input" ^
   --output-directory "I:\AI\output" ^
   --user-directory "I:\AI\workflows" ^
