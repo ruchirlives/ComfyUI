@@ -16,6 +16,6 @@ REM Run ComfyUI with the venv interpreter only
   --user-directory "I:\AI\workflows" ^
   --extra-model-paths-config "I:\AI\ComfyUI-Configs\extra_model_paths.yaml" ^
   --enable-manager ^
-  --cache-none
+  --enable-cors-header *
 
 endlocal
