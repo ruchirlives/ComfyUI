@@ -247,7 +247,10 @@ class LTXAVTEModel(torch.nn.Module):
             constant /= 2.0
 
         token_weight_pairs = token_weight_pairs.get(self.text_encoder_key, [])
-        m = min([sum(1 for _ in itertools.takewhile(lambda x: x[0] == 0, sub)) for sub in token_weight_pairs])
+        if token_weight_pairs:
+            m = min([sum(1 for _ in itertools.takewhile(lambda x: x[0] == 0, sub)) for sub in token_weight_pairs])
+        else:
+            m = 0
 
         num_tokens = sum(map(lambda a: len(a), token_weight_pairs)) - m
         num_tokens = max(num_tokens, 642)
